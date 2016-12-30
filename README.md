@@ -4,8 +4,6 @@ This library is node vm wrapper, it is able to get all inner variables.
 
 ## Usage
 
-https://gist.github.com/suguru03/a07a9f9eebc27b66542e319736ed45dd
-
 ```js
 // sample.js
 const test1 = 'test1';
@@ -53,4 +51,6 @@ const result2 = new Agent(result1.test).setArguments(4, 5, 6).run().getInnerVari
  *   num3: 3 }
  */
 ```
+
+https://gist.github.com/suguru03/a07a9f9eebc27b66542e319736ed45dd
 

@@ -7,6 +7,13 @@
     "test": "mocha test --recursive"
   },
   "author": "Suguru Motegi",
+  "license": "MIT",
+  "keywords": "vm",
+  "repository": {
+    "type": "git",
+    "url": "git@github.com:suguru03/vm-agent.git"
+  },
+  "homepage": "https://github.com/suguru03/vm-agent",
   "dependencies": {
     "escodegen": "^1.8.1",
     "esprima": "^3.1.3"
