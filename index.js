@@ -72,11 +72,6 @@ const FN_ARG_SPLIT = /,/;
 const FN_ARG = /(=.+)?(\s*)$/;
 const STRIP_COMMENTS = /((\/\/.*$)|(\/\*[\s\S]*?\*\/))/mg;
 
-/**
- * parse function arguments for `autoInject`
- *
- * @private
- */
 function parseArgs(code) {
   code = code.replace(STRIP_COMMENTS, '');
   code = code.match(FN_ARGS)[2].replace(' ', '');
@@ -109,10 +104,8 @@ function resolveAST(part) {
   if (obj) {
     return resolveAST(obj);
   }
-  switch (part.type) {
-  case 'VariableDeclaration':
+  if (part.type === 'VariableDeclaration') {
     part.kind = 'var';
-    break;
   }
 }
 
@@ -131,8 +124,17 @@ function runInNewContext(code, context) {
   return new Agent(code, context).run();
 }
 
-function run(code, context) {
-  return runInNewContext(code, context);
+function run(code) {
+  const agent = new Agent(code);
+  let l = arguments.length;
+  if (l > 1) {
+    const args = Array(--l);
+    while (l--) {
+      args[l] = arguments[l + 1];
+    }
+    agent.setArguments.apply(agent, args);
+  }
+  return agent.run();
 }
 
 run.run = run;
