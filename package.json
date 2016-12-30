@@ -1,7 +1,7 @@
 {
   "name": "vm-agent",
   "version": "0.1.0",
-  "description": "",
+  "description": "This library is able to get all inner variables",
   "main": "index.js",
   "scripts": {
     "test": "mocha test --recursive"
