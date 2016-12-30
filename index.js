@@ -1,14 +1,17 @@
 'use strict';
 
 const vm = require('vm');
-const _ = require('lodash');
 const esprima = require('esprima');
 const escodegen = require('escodegen');
+const globalKeyMap = Object.keys(global).reduce((result, key) => {
+  result[key] = key;
+  return result;
+}, { require });
 
 class Agent {
   constructor(code, context) {
     this._code = code;
-    this._context = context;
+    this._context = resolveContext(context);
     this._result = undefined;
   }
   setCode(code) {
@@ -21,7 +24,7 @@ class Agent {
   }
   run() {
     const code = generateCode(this._code);
-    const context = resolveContext(this._context);
+    const context = this._context;
     const result = vm.runInNewContext(code, context);
     this._result = result;
     return this;
@@ -33,7 +36,12 @@ class Agent {
     return this._context;
   }
   getInnerVariable() {
-    return _.omit(this._context, (value, key) => global[key]);
+    return Object.keys(this._context).reduce((result, key) => {
+      if (!globalKeyMap[key]) {
+        result[key] = this._context[key];
+      }
+      return result;
+    }, {});
   }
 }
 
@@ -44,8 +52,8 @@ function generateCode(code) {
 }
 
 function resolveAST(part) {
-  if (_.isArray(part)) {
-    return _.forEach(part, resolveAST);
+  if (Array.isArray(part)) {
+    return part.forEach(resolveAST);
   }
   if (part.body) {
     return resolveAST(part.body);
