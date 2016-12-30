@@ -94,9 +94,10 @@ function makeVariable(func, args) {
 function resolveFunction(code, args) {
   const variable = makeVariable(code, args);
   const str = code.trim()
-    .replace(/(.*)\{/, variable)
-    .replace(/return(.*);/, '')
-    .replace(/}$/, '');
+    .replace(/^(.*)\{/, variable)
+    .replace(/(\}|\};)$/, '')
+    .trim()
+    .replace(/return(.*);$/, '');
   return str;
 }
 

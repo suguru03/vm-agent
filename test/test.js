@@ -50,6 +50,46 @@ describe('#Agent', () => {
     assert.strictEqual(variable.arg3, 3);
     assert.strictEqual(variable.sum, 6);
   });
+
+  it('should get inner variable of arrow function', () => {
+    const test = (arg1, arg2, arg3) => {
+      const sum = arg1 + arg2 + arg3;
+      const test1 = 'inner const test1';
+      let test2 =  'inner let test2';
+      var test3 = 'inner var test3';
+      return sum + test1 + test2 + test3;
+    };
+    const agent = new Agent(test);
+    const variable = agent.setArguments(1, 2, 3, 4).run().getInnerVariable();
+    const keys = Object.keys(variable);
+    assert.deepEqual(keys, ['arg1', 'arg2', 'arg3', 'sum', 'test1', 'test2', 'test3']);
+    assert.strictEqual(variable.arg1, 1);
+    assert.strictEqual(variable.arg2, 2);
+    assert.strictEqual(variable.arg3, 3);
+    assert.strictEqual(variable.sum, 6);
+  });
+
+  it('should run inner function and get inner variable', () => {
+    const { test } = new Agent(code).run().getInnerVariable();
+    assert.strictEqual(typeof test, 'function');
+    const variable = new Agent(test).run().getInnerVariable();
+    const keys = Object.keys(variable);
+    assert.deepEqual(keys, ['test1', 'test2', 'test3']);
+  });
+
+  it('should get inner variable with complex function', () => {
+    function test(arg1, arg2, arg3) {
+      const sum = (() => arg1 + arg2 + arg3);
+      const sum1 = (function sum(arg1, arg2) {
+        return arg1 + arg2;
+      })(arg1, arg3);
+      return sum + sum1;
+    }
+    const variable = new Agent(test).setArguments(3, 1, 2).run().getInnerVariable();
+    const keys = Object.keys(variable);
+    assert.deepEqual(keys, ['arg1', 'arg2', 'arg3', 'sum', 'sum1']);
+    assert.strictEqual(variable.sum1, 5);
+  });
 });
 
 describe('#runInNewContext', () => {
