@@ -74,5 +74,4 @@ console.log(result2);
  */
 ```
 
-https://gist.github.com/suguru03/a07a9f9eebc27b66542e319736ed45dd
-
+https://github.com/suguru03/vm-agent/tree/master/example
