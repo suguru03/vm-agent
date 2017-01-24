@@ -1,5 +1,6 @@
 'use strict';
 
+const fs = require('fs');
 const vm = require('vm');
 const esprima = require('esprima');
 const escodegen = require('escodegen');
@@ -10,7 +11,7 @@ const globalKeyMap = Object.keys(global).reduce((result, key) => {
 
 class Agent {
   constructor(code, context) {
-    this._code = code;
+    this._code = /^\/(.*).js$/.test(code) ? fs.readFileSync(code, 'utf8') : code;
     this._args = [];
     this._context = resolveContext(context);
     this._result = undefined;

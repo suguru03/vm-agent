@@ -48,6 +48,8 @@ const filepath = path.resolve(__dirname, 'sample.js');
 const code = fs.readFileSync(filepath, 'utf8');
 
 const { Agent } = require('vm-agent');
+const result1 = new Agent(filepath).run().getInnerVariable();
+// or
 const result1 = new Agent(code).run().getInnerVariable();
 console.log(result1);
 /**

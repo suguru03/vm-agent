@@ -16,7 +16,7 @@ console.log(context);
  *   test: [Function: test] } // let, constが取得できない
  */
 
-const result1 = new Agent(file)
+const result1 = new Agent(filepath)
   .run()
   .getInnerVariable();
 
