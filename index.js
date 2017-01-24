@@ -1,6 +1,7 @@
 'use strict';
 
 const fs = require('fs');
+const path = require('path');
 const vm = require('vm');
 const esprima = require('esprima');
 const escodegen = require('escodegen');
@@ -11,9 +12,10 @@ const globalKeyMap = Object.keys(global).reduce((result, key) => {
 
 class Agent {
   constructor(code, context) {
-    this._code = /^\/(.*).js$/.test(code) ? fs.readFileSync(code, 'utf8') : code;
+    this._filepath = /^\/(.*).js$/.test(code) ? code : '';
+    this._code = this._filepath ? fs.readFileSync(code, 'utf8') : code;
     this._args = [];
-    this._context = resolveContext(context);
+    this._context = resolveContext(context, this._filepath);
     this._result = undefined;
   }
   setCode(code) {
@@ -51,6 +53,13 @@ class Agent {
   }
   getInnerVariable() {
     return Object.keys(this._context).reduce((result, key) => {
+      if (key === 'module') {
+        const { exports } = this._context[key];
+        if (exports !== run) {
+          result[key] = { exports };
+        }
+        return result;
+      }
       if (!globalKeyMap[key]) {
         result[key] = this._context[key];
       }
@@ -110,10 +119,35 @@ function resolveAST(part) {
   }
 }
 
-function resolveContext(context) {
+function resolveContext(context, filepath) {
+  const re = /(Error|\/vm-agent\/index.js)/;
+  const trace = new Error().stack.split('\n').find(str => !re.test(str));
+  const parts = trace.match(/\/(.*)\//g)[0].split('/');
+  let dirpath;
+  while (!dirpath && parts.length) {
+    const dp = parts.join('/');
+    const pp = path.resolve(dp, 'package.json');
+    if (fs.existsSync(pp)) {
+      dirpath = dp;
+    }
+    parts.pop();
+  }
   context = context || global;
   context = context === global ? Object.assign({}, global) : context;
-  context.require = require;
+  context.module = module;
+  context.require = !dirpath ? require : p => {
+    let fp;
+    if (/^\./.test(p)) {
+      fp = path.resolve(filepath || dirpath, filepath ? '..' : '', p);
+    } else {
+      fp = path.resolve(dirpath, 'node_modules', p);
+    }
+    try {
+      return require(fp);
+    } catch (e) {
+      return require(p);
+    }
+  };
   return context;
 }
 
