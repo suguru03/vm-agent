@@ -1,6 +1,6 @@
 {
   "name": "vm-agent",
-  "version": "0.3.0",
+  "version": "0.3.1",
   "description": "This library is able to get all inner variables",
   "main": "index.js",
   "scripts": {
