@@ -132,8 +132,10 @@ function resolveContext(context, filepath) {
     }
     parts.pop();
   }
+  const diraname = filepath ? path.resolve(filepath, '..') : dirpath;
   context = context || global;
   context = context === global ? Object.assign({}, global) : context;
+  context.__dirname = diraname;
   context.module = module;
   context.require = !dirpath ? require : p => {
     let fp;
