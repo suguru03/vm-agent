@@ -137,6 +137,7 @@ function resolveContext(context, filepath) {
   context = context === global ? Object.assign({}, global) : context;
   context.__dirname = diraname;
   context.module = module;
+  context.exports = module.exports;
   context.require = !dirpath ? require : p => {
     let fp;
     if (/^\./.test(p)) {
