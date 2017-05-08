@@ -8,7 +8,7 @@ const escodegen = require('escodegen');
 const globalKeyMap = Object.keys(global).reduce((result, key) => {
   result[key] = key;
   return result;
-}, { require });
+}, { require, exports, __dirname });
 
 class Agent {
   constructor(code, context) {
