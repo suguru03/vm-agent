@@ -4,8 +4,9 @@ const fs = require('fs');
 const path = require('path');
 const assert = require('assert');
 
-const filepath = path.resolve(__dirname, 'sample.js');
-const code = fs.readFileSync(filepath, 'utf8');
+const basicpath = path.resolve(__dirname, 'sample', 'basic.js');
+const asyncpath = path.resolve(__dirname, 'sample', 'async.js');
+const code = fs.readFileSync(basicpath, 'utf8');
 
 const agent = require('../');
 const { Agent, runInNewContext } = agent;
@@ -16,7 +17,7 @@ describe('#Agent', () => {
     const agent = new Agent(code);
     const variable = agent.run().getInnerVariable();
     const keys = Object.keys(variable);
-    assert.deepEqual(keys, ['assert', 'test1', 'test2', 'test3', 'test']);
+    assert.deepEqual(keys, ['test', 'assert', 'test1', 'test2', 'test3']);
     assert.strictEqual(variable.test1, 'const test1');
   });
 
@@ -89,6 +90,13 @@ describe('#Agent', () => {
     const keys = Object.keys(variable);
     assert.deepEqual(keys, ['arg1', 'arg2', 'arg3', 'sum', 'sum1']);
     assert.strictEqual(variable.sum1, 5);
+  });
+
+  it('should work with a async arrow function', () => {
+
+    const variable = new Agent(asyncpath).run().getInnerVariable();
+    assert.ok(variable);
+    assert.deepEqual(Object.keys(variable), ['result']);
   });
 });
 
