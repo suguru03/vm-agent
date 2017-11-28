@@ -77,7 +77,7 @@ function generateCode(code, args) {
   return isFunc ? resolveFunction(code, args) : code;
 }
 
-const FN_ARGS = /^(function)?\s*[^\(]*\(\s*([^\)]*)\)/m;
+const FN_ARGS = /^(function)?\s*[^(]*\(\s*([^)]*)\)/m;
 const FN_ARG_SPLIT = /,/;
 const FN_ARG = /(=.+)?(\s*)$/;
 const STRIP_COMMENTS = /((\/\/.*$)|(\/\*[\s\S]*?\*\/))/mg;
@@ -98,11 +98,13 @@ function makeVariable(func, args) {
 
 function resolveFunction(code, args) {
   const variable = makeVariable(code, args);
-  const str = code.trim()
-    .replace(/^(.*)\{/, variable)
-    .replace(/(\}|\};)$/, '')
+  let str = code
+    .replace(/^.*\{/, variable)
+    .replace(/\}?;?$/, '')
     .trim()
-    .replace(/return(.*);$/, '');
+    .replace(/return.*;?$/, '')
+    .trim();
+
   return str;
 }
 
