@@ -2,6 +2,7 @@
 
 const fs = require('fs');
 const path = require('path');
+const util = require('util');
 const assert = require('assert');
 
 const basicpath = path.resolve(__dirname, 'sample', 'basic.js');
@@ -10,6 +11,7 @@ const code = fs.readFileSync(basicpath, 'utf8');
 
 const agent = require('../');
 const { Agent, runInNewContext } = agent;
+const delay = util.promisify(setTimeout);
 
 describe('#Agent', () => {
 
@@ -93,10 +95,33 @@ describe('#Agent', () => {
   });
 
   it('should work with a async arrow function', () => {
-
     const variable = new Agent(asyncpath).run().getInnerVariable();
     assert.ok(variable);
     assert.deepEqual(Object.keys(variable), ['result']);
+  });
+
+  it('should work async function with context', async () => {
+    const fn = async () => {
+      await delay(100);
+      const a = 1;
+      const b = 2;
+      function callSync() {
+        const s = 4;
+        return s;
+      }
+      async function callAsync() {
+        await delay(100);
+        const c = 3;
+        return c;
+      }
+      const d = await callAsync();
+      const e = callSync();
+      return a + b + d + e;
+    };
+    const context = { delay };
+    const variable = await new Agent(fn, context).run().getInnerVariable();
+    const keys = Object.keys(variable);
+    assert.deepStrictEqual(keys, ['delay', 'a', 'b', 'callSync', 'callAsync', 'd', 'e']);
   });
 });
 
