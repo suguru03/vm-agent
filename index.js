@@ -1,8 +1,8 @@
 'use strict';
 
+const vm = require('vm');
 const fs = require('fs');
 const path = require('path');
-const vm = require('vm');
 
 const esprima = require('esprima');
 const escodegen = require('escodegen');
@@ -16,10 +16,14 @@ const FN_ARGS = /^(function)?\s*[^(]*\(\s*([^)]*)\)/m;
 const FN_ARG_SPLIT = /,/;
 const FN_ARG = /(=.+)?(\s*)$/;
 const STRIP_COMMENTS = /((\/\/.*$)|(\/\*[\s\S]*?\*\/))/mg;
+const S = new Error()
+  .stack
+  .split(/\n/)[1]
+  .match(/(\/|\\)/)[1];
 
 class Agent {
   constructor(code, context) {
-    this._filepath = /^\/(.*).js$/.test(code) ? code : '';
+    this._filepath = new RegExp(`\\${S}(.*).js$`).test(code) ? code : '';
     this._code = this._filepath ? fs.readFileSync(code, 'utf8') : code;
     this._completed = false;
     this._args = [];
@@ -64,6 +68,9 @@ class Agent {
   }
   getContext() {
     return this._context;
+  }
+  getValue() {
+    return this.getInnerVariable();
   }
   getInnerVariable() {
     if (!this._completed) {
@@ -144,9 +151,10 @@ function resolveAST(part) {
 }
 
 function resolveContext(ctx, filepath) {
-  const re = /(Error|\/vm-agent\/index.js)/;
-  const trace = new Error().stack.split('\n').find(str => !re.test(str));
-  const parts = trace.match(/\/(.*)\//g)[0].split('/');
+  const findRe = new RegExp(`(Error|\\${S}vm-agent\\${S}index.js)`);
+  const trace = new Error().stack.split('\n').find(str => !findRe.test(str));
+  const parseRe = new RegExp(`\\${S}(.*)\\${S}`);
+  const parts = trace.match(parseRe)[0].split(S);
   let dirpath;
   while (!dirpath && parts.length) {
     const dp = parts.join('/');
