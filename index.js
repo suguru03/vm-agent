@@ -143,7 +143,7 @@ function resolveAST(part) {
   }
 }
 
-function resolveContext(context, filepath) {
+function resolveContext(ctx, filepath) {
   const re = /(Error|\/vm-agent\/index.js)/;
   const trace = new Error().stack.split('\n').find(str => !re.test(str));
   const parts = trace.match(/\/(.*)\//g)[0].split('/');
@@ -156,26 +156,30 @@ function resolveContext(context, filepath) {
     }
     parts.pop();
   }
-  const diraname = filepath ? path.resolve(filepath, '..') : dirpath;
-  context = context || global;
-  context = context === global ? Object.assign({}, global) : context;
-  context.__dirname = diraname;
-  context.module = module;
-  context.exports = module.exports;
-  context.require = !dirpath ? require : p => {
-    let fp;
-    if (/^\./.test(p)) {
-      fp = path.resolve(filepath || dirpath, filepath ? '..' : '', p);
-    } else {
-      fp = path.resolve(dirpath, 'node_modules', p);
-    }
-    try {
-      return require(fp);
-    } catch (e) {
-      return require(p);
+  const dirname = ctx && ctx.__dirname ? ctx.__dirname : filepath ? path.resolve(filepath, '..') : dirpath;
+  ctx = ctx || global;
+  ctx = ctx === global ? Object.assign({}, global) : ctx;
+  const map = {
+    __dirname: dirname,
+    module,
+    exports,
+    console,
+    require: p => {
+      let fp;
+      if (/^\./.test(p)) {
+        fp = path.resolve(filepath || dirpath, filepath ? '..' : '', p);
+      } else {
+        fp = path.resolve(dirpath, 'node_modules', p);
+      }
+      try {
+        return require(fp);
+      } catch (e) {
+        return require(p);
+      }
     }
   };
-  return context;
+  Object.entries(map).forEach(([key, func]) => ctx[key] = ctx[key] || func);
+  return ctx;
 }
 
 function runInThisContext(code) {
