@@ -151,20 +151,25 @@ function resolveAST(part) {
 }
 
 function resolveContext(ctx, filepath) {
-  const findRe = new RegExp(`(Error|\\${S}vm-agent\\${S}index.js)`);
-  const trace = new Error().stack.split('\n').find(str => !findRe.test(str));
-  const parseRe = new RegExp(`\\${S}(.*)\\${S}`);
-  const parts = trace.match(parseRe)[0].split(S);
-  let dirpath;
-  while (!dirpath && parts.length) {
-    const dp = parts.join('/');
-    const pp = path.resolve(dp, 'package.json');
-    if (fs.existsSync(pp)) {
-      dirpath = dp;
+  let dirname;
+  if (ctx && ctx.__dirname) {
+    dirname = ctx.__dirname;
+  } else if (filepath) {
+    dirname = path.resolve(filepath, '..');
+  } else {
+    const findRe = new RegExp(`(Error|\\${S}vm-agent\\${S}index.js)`);
+    const trace = new Error().stack.split('\n').find(str => !findRe.test(str));
+    const parseRe = new RegExp(`\\${S}(.*)\\${S}`);
+    const parts = trace.match(parseRe)[0].split(S);
+    while (!dirname && parts.length) {
+      const dp = parts.join('/');
+      const pp = path.resolve(dp, 'package.json');
+      if (fs.existsSync(pp)) {
+        dirname = dp;
+      }
+      parts.pop();
     }
-    parts.pop();
   }
-  const dirname = ctx && ctx.__dirname ? ctx.__dirname : filepath ? path.resolve(filepath, '..') : dirpath;
   ctx = ctx || global;
   ctx = ctx === global ? Object.assign({}, global) : ctx;
   const map = {
@@ -175,9 +180,9 @@ function resolveContext(ctx, filepath) {
     require: p => {
       let fp;
       if (/^\./.test(p)) {
-        fp = path.resolve(filepath || dirpath, filepath ? '..' : '', p);
+        fp = path.resolve(filepath || dirname, filepath ? '..' : '', p);
       } else {
-        fp = path.resolve(dirpath, 'node_modules', p);
+        fp = path.resolve(dirname, 'node_modules', p);
       }
       try {
         return require(fp);
