@@ -157,10 +157,8 @@ describe('#Agent', () => {
       const util = require('util');
       const delay = util.promisify(setTimeout);
       await delay(100);
-      console.log('func1 is called');
       async function func2() { // eslint-disable-line
         await delay(100);
-        console.log('func2 is called');
       }
     }
     const agent = await new Agent(func1).runAsync();

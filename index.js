@@ -130,8 +130,8 @@ function resolveFunction(code, args) {
     .trim();
 
   if (/^async\s/.test(code)) {
-    str = str
-      .replace(/(\n?\s{0,4}var\s([^([|{)].*))\s=(.*)/g, '$1 = this.$2 =$3')
+    str = `\n    ${str}`
+      .replace(/(\n\s{4}var\s([^([|{)].*))\s=(.*)/g, '$1 = this.$2 =$3')
       .replace(/(async)?\s?function\s(.+)\(/g, 'this.$2 = $2;$1 function $2(');
     str = `(async () => { ${str}})();`;
   }
