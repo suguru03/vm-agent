@@ -1,8 +1,29 @@
 # vm-agent
 
-This library is node vm wrapper, it is able to get all inner variables.
+The library is vm module wrapper, it is supposed to be used for testing inner variables or hacking scripts. It is not for production.
+
+It supports executing scripts, functions by filepath or functions.
+Also, it will be able to access inner variables.
 
 ## Usage
+
+```
+$ npm i -D vm-agent
+```
+
+If you want to run a script using vm, you need to set a filepath and call `run`. The context is resolved automatically.
+
+```
+const agent = new Agent(<filepath>).run();
+```
+
+After that, if you wanna get inner variables, you need to call `getInnerVariables`.
+
+```
+const innerVariables = agent.getInnerVariables();
+```
+
+### Function
 
 ```js
 const { Agent } = require('vm-agent');
@@ -76,4 +97,9 @@ console.log(result2);
  */
 ```
 
-https://github.com/suguru03/vm-agent/tree/master/example
+### Async/Await
+
+```js
+const { Agent } = require('vm-agent');
+
+```

@@ -119,7 +119,8 @@ describe('#Agent', () => {
       return a + b + d + e;
     };
     const context = { delay };
-    const variable = await new Agent(fn, context).run().getInnerVariable();
+    const agent = await new Agent(fn, context).runAsync();
+    const variable = agent.getInnerVariable();
     const keys = Object.keys(variable);
     assert.deepStrictEqual(keys, ['delay', 'a', 'b', 'callSync', 'callAsync', 'd', 'e']);
   });
@@ -144,7 +145,8 @@ describe('#Agent', () => {
       return a + b + c + c + d + e + f;
     };
     const context = { delay };
-    const variable = await new Agent(fn, context).run().getInnerVariable();
+    const agent = await new Agent(fn, context).runAsync();
+    const variable = agent.getInnerVariable();
     const keys = Object.keys(variable);
     // TODO assign destructued variables
     assert.deepStrictEqual(keys, ['delay', 'getArray', 'getObj']);

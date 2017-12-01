@@ -22,18 +22,20 @@ const S = new Error()
   .match(/(\/|\\)/)[1];
 
 class Agent {
+
   constructor(code, context) {
     this._filepath = new RegExp(`\\${S}(.*).js$`).test(code) ? code : '';
     this._code = this._filepath ? fs.readFileSync(code, 'utf8') : code;
-    this._completed = false;
     this._args = [];
     this._context = resolveContext(context, this._filepath);
     this._result = undefined;
   }
+
   setCode(code) {
     this._code = code;
     return this;
   }
+
   setArguments() {
     let l = arguments.length;
     if (!l) {
@@ -46,36 +48,36 @@ class Agent {
     this._args = args;
     return this;
   }
+
   setContext(context) {
     this._context = resolveContext(context);
     return this;
   }
+
   run() {
     const code = generateCode(this._code, this._args);
-    const context = this._context;
-    this._result = vm.runInNewContext(code, context);
-    this._completed = !this._result || this._result.toString() !== '[object Promise]';
-    if (!this._completed) {
-      this._result.then(res => {
-        this._completed = true;
-        this._result = res;
-      });
-    }
+    this._result = vm.runInNewContext(code, this._context);
     return this;
   }
+
+  async runAsync() {
+    this._result = await this.run()._result;
+    return this;
+  }
+
   getResult() {
     return this._result;
   }
+
   getContext() {
     return this._context;
   }
+
   getValue() {
     return this.getInnerVariable();
   }
+
   getInnerVariable() {
-    if (!this._completed) {
-      return returnActualInnerVariable(this);
-    }
     return Object.keys(this._context).reduce((result, key) => {
       if (key === 'module') {
         const { exports } = this._context[key];
@@ -90,12 +92,6 @@ class Agent {
       return result;
     }, {});
   }
-}
-
-async function returnActualInnerVariable(agent) {
-  await agent._result;
-  agent._completed = true;
-  return agent.getInnerVariable();
 }
 
 function generateCode(code, args) {
