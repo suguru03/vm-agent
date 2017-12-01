@@ -151,6 +151,23 @@ describe('#Agent', () => {
     // TODO assign destructued variables
     assert.deepStrictEqual(keys, ['delay', 'getArray', 'getObj']);
   });
+
+  it('should work with async/await', async () => {
+    async function func1() {
+      const util = require('util');
+      const delay = util.promisify(setTimeout);
+      await delay(100);
+      console.log('func1 is called');
+      async function func2() { // eslint-disable-line
+        await delay(100);
+        console.log('func2 is called');
+      }
+    }
+    const agent = await new Agent(func1).runAsync();
+    const data = agent.getInnerVariable();
+    assert.deepStrictEqual(Object.keys(data), ['util', 'delay', 'func2']);
+    await new Agent(data.func2, agent.getContext()).runAsync();
+  });
 });
 
 describe('#runInNewContext', () => {

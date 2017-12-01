@@ -26,6 +26,7 @@ class Agent {
   constructor(code, context) {
     this._filepath = new RegExp(`\\${S}(.*).js$`).test(code) ? code : '';
     this._code = this._filepath ? fs.readFileSync(code, 'utf8') : code;
+    this._executed = false;
     this._args = [];
     this._context = resolveContext(context, this._filepath);
     this._result = undefined;
@@ -49,12 +50,11 @@ class Agent {
     return this;
   }
 
-  setContext(context) {
-    this._context = resolveContext(context);
-    return this;
-  }
-
   run() {
+    if (this._executed) {
+      return this;
+    }
+    this._executed = true;
     const code = generateCode(this._code, this._args);
     this._result = vm.runInNewContext(code, this._context);
     return this;
@@ -71,6 +71,11 @@ class Agent {
 
   getContext() {
     return this._context;
+  }
+
+  setContext(context) {
+    this._context = resolveContext(context);
+    return this;
   }
 
   getValue() {
@@ -126,7 +131,7 @@ function resolveFunction(code, args) {
 
   if (/^async\s/.test(code)) {
     str = str
-      .replace(/(\n\s{4}var\s([^([|{)]))\s=(.*)/g, '$1 = this.$2 =$3')
+      .replace(/(\n?\s{0,4}var\s([^([|{)].*))\s=(.*)/g, '$1 = this.$2 =$3')
       .replace(/(async)?\s?function\s(.+)\(/g, 'this.$2 = $2;$1 function $2(');
     str = `(async () => { ${str}})();`;
   }
