@@ -132,8 +132,13 @@ describe('#Agent', () => {
         return [1, 2, 3];
       }
       async function getObj() {
-        return [1, 2, 3];
+        return {
+          a: 1,
+          b: 2,
+          c: 3
+        };
       }
+      const sum = ({ a, b, c }) => a + b + c;
       const [a, b] = await getArray();
       const [
         c,
@@ -142,14 +147,15 @@ describe('#Agent', () => {
       const {
         e, f
       } = await getObj();
-      return a + b + c + c + d + e + f;
+      const s = sum(await getObj());
+      return a + b + c + c + d + e + f + s;
     };
     const context = { delay };
     const agent = await new Agent(fn, context).runAsync();
     const variable = agent.getInnerVariable();
     const keys = Object.keys(variable);
     // TODO assign destructued variables
-    assert.deepStrictEqual(keys, ['delay', 'getArray', 'getObj']);
+    assert.deepStrictEqual(keys, ['delay', 'getArray', 'getObj', 'sum', 's']);
   });
 
   it('should work with async/await', async () => {
