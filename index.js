@@ -83,6 +83,10 @@ class Agent {
   }
 
   getInnerVariable() {
+    return this.getInnerVariables();
+  }
+
+  getInnerVariables() {
     return Object.keys(this._context).reduce((result, key) => {
       if (key === 'module') {
         const { exports } = this._context[key];
