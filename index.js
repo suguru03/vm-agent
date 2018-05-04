@@ -3,14 +3,23 @@
 const vm = require('vm');
 const fs = require('fs');
 const path = require('path');
+const util = require('util');
 
 const esprima = require('esprima');
 const escodegen = require('escodegen');
 
+const CLASS_MAP = {
+  Array,
+  Function,
+  Boolean,
+  String,
+  Error,
+  Number
+};
 const globalKeyMap = Object.keys(global).reduce((result, key) => {
   result[key] = key;
   return result;
-}, { require, exports, __dirname });
+}, { util, require, exports, __dirname, console, CLASS_MAP });
 
 const FN_ARGS = /^(function)?\s*[^(]*\(\s*([^)]*)\)/m;
 const FN_ARG_SPLIT = /,/;
@@ -109,7 +118,16 @@ function generateCode(code, args) {
   const parts = esprima.parse(code);
   resolveAST(parts);
   code = escodegen.generate(parts);
-  return isFunc ? resolveFunction(code, args) : code;
+  const inherits = `
+    util.inherits(Array, CLASS_MAP.Array);
+    util.inherits(Function, CLASS_MAP.Function);
+    util.inherits(Boolean, CLASS_MAP.Boolean);
+    util.inherits(String, CLASS_MAP.String);
+    util.inherits(Error, CLASS_MAP.Error);
+    util.inherits(Number, CLASS_MAP.Number);
+  `;
+  const resolved = isFunc ? resolveFunction(code, args) : code;
+  return `${inherits}${resolved}`;
 }
 
 function parseArgs(code) {
@@ -182,6 +200,8 @@ function resolveContext(ctx, filepath) {
     module,
     exports,
     console,
+    util,
+    CLASS_MAP,
     require: p => {
       let fp;
       if (/^\./.test(p)) {

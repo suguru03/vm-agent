@@ -169,8 +169,14 @@ describe('#Agent', () => {
     }
     const agent = await new Agent(func1).runAsync();
     const data = agent.getInnerVariable();
-    assert.deepStrictEqual(Object.keys(data), ['util', 'delay', 'func2']);
+    assert.deepStrictEqual(Object.keys(data), ['delay', 'func2']); // util is reserved
     await new Agent(data.func2, agent.getContext()).runAsync();
+  });
+
+  it('should get the extended array', () => {
+    const code = 'const array = []';
+    const { array } = new Agent(code).run().getInnerVariable();
+    assert.ok(array instanceof Array);
   });
 });
 
