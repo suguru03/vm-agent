@@ -139,7 +139,14 @@ function parseArgs(code) {
 
 function makeVariable(func, args) {
   return parseArgs(func)
-    .reduce((str, key, i) => `${str}var ${key} = ${args[i]};\n`, '');
+    .map((key, i) => {
+      let arg = args[i];
+      if (Array.isArray(arg)) {
+        arg = `[${arg}]`;
+      }
+      return `var ${key} = ${arg};`;
+    })
+    .join('\n');
 }
 
 function resolveFunction(code, args) {
