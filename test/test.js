@@ -103,6 +103,15 @@ describe('#Agent', () => {
     assert.strictEqual(variable.sum, 6);
   });
 
+  it('should work with an array of strings', () => {
+    function test(arr) {
+      const str = arr.reduce((sum, n) => sum + n);
+      return str;
+    }
+    const variable = new Agent(test).setArguments(['a', 'b', 'c']).run().getInnerVariable();
+    assert.strictEqual(variable.str, 'abc');
+  });
+
   it('should work with a async arrow function', () => {
     const variable = new Agent(asyncpath).run().getInnerVariable();
     assert.ok(variable);

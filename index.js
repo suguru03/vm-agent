@@ -139,13 +139,7 @@ function parseArgs(code) {
 
 function makeVariable(func, args) {
   return parseArgs(func)
-    .map((key, i) => {
-      let arg = args[i];
-      if (Array.isArray(arg)) {
-        arg = `[${arg}]`;
-      }
-      return `var ${key} = ${arg};`;
-    })
+    .map((key, i) => `var ${key} = ${JSON.stringify(args[i])};`)
     .join('\n');
 }
 
