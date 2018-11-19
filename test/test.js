@@ -196,6 +196,16 @@ describe('#Agent', () => {
     const { array } = new Agent(code).run().getInnerVariable();
     assert.ok(array instanceof Array);
   });
+
+  it('should get the extended TypeError', () => {
+    const code = 'const array = array.b.c';
+    try {
+      new Agent(code).run();
+    } catch (e) {
+      assert.ok(e instanceof Error);
+      assert.ok(e instanceof TypeError);
+    }
+  });
 });
 
 describe('#runInNewContext', () => {

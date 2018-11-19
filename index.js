@@ -13,8 +13,13 @@ const CLASS_MAP = {
   Function,
   Boolean,
   String,
+  Number,
   Error,
-  Number
+  RangeError,
+  ReferenceError,
+  SyntaxError,
+  TypeError,
+  URIError
 };
 const globalKeyMap = Object.keys(global).reduce((result, key) => {
   result[key] = key;
@@ -123,8 +128,12 @@ function generateCode(code, args) {
     util.inherits(Function, CLASS_MAP.Function);
     util.inherits(Boolean, CLASS_MAP.Boolean);
     util.inherits(String, CLASS_MAP.String);
-    util.inherits(Error, CLASS_MAP.Error);
     util.inherits(Number, CLASS_MAP.Number);
+    util.inherits(RangeError, CLASS_MAP.RangeError);
+    util.inherits(ReferenceError, CLASS_MAP.ReferenceError);
+    util.inherits(SyntaxError, CLASS_MAP.SyntaxError);
+    util.inherits(TypeError, CLASS_MAP.TypeError);
+    util.inherits(URIError, CLASS_MAP.URIError);
   `;
   const resolved = isFunc ? resolveFunction(code, args) : code;
   return `${inherits}${resolved}`;
@@ -202,6 +211,7 @@ function resolveContext(ctx, filepath) {
     exports,
     console,
     util,
+    Buffer,
     CLASS_MAP,
     require: p => {
       let fp;
