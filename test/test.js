@@ -206,6 +206,12 @@ describe('#Agent', () => {
       assert.ok(e instanceof TypeError);
     }
   });
+
+  it('should have the global', () => {
+    const code = 'const array = new global.Array()';
+    const { array } = new Agent(code).run().getInnerVariable();
+    assert.ok(array instanceof Array);
+  });
 });
 
 describe('#runInNewContext', () => {

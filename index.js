@@ -14,6 +14,7 @@ const CLASS_MAP = {
   Boolean,
   String,
   Number,
+  Date,
   Error,
   RangeError,
   ReferenceError,
@@ -129,6 +130,7 @@ function generateCode(code, args) {
     util.inherits(Boolean, CLASS_MAP.Boolean);
     util.inherits(String, CLASS_MAP.String);
     util.inherits(Number, CLASS_MAP.Number);
+    util.inherits(Date, CLASS_MAP.Date);
     util.inherits(RangeError, CLASS_MAP.RangeError);
     util.inherits(ReferenceError, CLASS_MAP.ReferenceError);
     util.inherits(SyntaxError, CLASS_MAP.SyntaxError);
@@ -227,6 +229,7 @@ function resolveContext(ctx, filepath) {
       }
     }
   };
+  ctx.global = ctx;
   Object.entries(map).forEach(([key, func]) => ctx[key] = ctx[key] || func);
   return ctx;
 }
