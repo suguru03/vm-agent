@@ -20,7 +20,8 @@ const CLASS_MAP = {
   ReferenceError,
   SyntaxError,
   TypeError,
-  URIError
+  URIError,
+  Buffer
 };
 const globalKeyMap = Object.keys(global).reduce((result, key) => {
   result[key] = key;
@@ -213,7 +214,6 @@ function resolveContext(ctx, filepath) {
     exports,
     console,
     util,
-    Buffer,
     CLASS_MAP,
     require: p => {
       let fp;
