@@ -19,6 +19,6 @@
     "esprima": "^4.0.1"
   },
   "devDependencies": {
-    "mocha": "^3.2.0"
+    "mocha": "^6.2.2"
   }
 }
